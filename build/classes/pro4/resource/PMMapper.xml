@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	<mapper namespace="pro4.dao.PMDao">
+	
+	<select id="totCnt" parameterType="pmboardsch"  resultType="int">	 
+		 SELECT count(*)
+		 FROM project
+		 WHERE 1=1		
+		 </select>
+		 
+		 
+	<!-- 
+	
+	select *
+	from (
+	select rownum cnt, level,b.*
+	from project b	
+	WHERE 1=1
+	 <if test="pname!=null">
+		 AND pname LIKE '%'||#{pname}||'%'
+		 </if>
+		 <if test="writer!=null">
+		 AND writer LIKE '%'||#{writer}||'%'
+		 </if>
+	start with refno = 0
+		 connect by prior project_no = refno
+		 order siblings by project_no desc  )
+	    where cnt between #{start} and #{end}
+	    
+	    
+	    세션처리후 리스트
+	    <select id="pmboardList" resultType="teammember" parameterType="pmboardsch">
+	  select *
+	from project	
+	WHERE 1=1
+	</select>
+	 -->
+ 	 
+	<select id="pmboardList" resultType="pmboard" parameterType="pmboardsch">
+	  select *
+		from (
+		 select rownum cnt,  p.*  
+		 from project p 
+		 WHERE 1=1
+		ORDER BY project_no ASC
+		  )
+	    where cnt between #{start} and #{end}
+	</select>
+	<!-- 
+	select m.*
+		from Mem4pro m,project p
+		where 1=1
+		and m.auth = p.auth
+		
+	 -->
+
+
+	 <!-- 여기서 <if test="name!=null"> 로 조건? -->
+	 <!-- 
+	 SELECT p.*
+		FROM project p
+		LEFT JOIN MEM4PRO m
+		ON p.auth = m.auth
+		WHERE p.name = m.name
+		<if test="m.auth='pm'">
+		AND p.auth LIKE 'pm'
+		</if>
+		<if test="m.auth='admin'">
+		AND p.auth LIKE 'admin'
+		</if>
+		<if test="m.auth='ceo'">
+		AND p.auth LIKE 'ceo';
+		</if>
+	  -->
+	   
+	<select id="pmList" resultType="member" parameterType="pmboardsch">	
+	
+		select *
+		from (
+		 select rownum cnt,  p.*  
+		 from project p 
+		 WHERE 1=1
+		
+		  )
+	    where cnt between #{start} and #{end}
+		
+	</select>
+	
+
+	
+	<select id="ckpm" parameterType="int" resultType="string">
+		select auth from mem4pro where empno = #{empno}
+	</select>
+	<!--
+	
+	
+	  
+	<update id="readCountup" parameterType="int">
+		update board
+		set readcnt = readcnt+1
+		where no = #{no}	
+	</update>
+	
+	
+	<select id="getBoardDetail" parameterType="int" resultType="board">
+		
+		select *
+		from project
+		where project_no = #{project_no}		
+	</select>
+	-->
+	
+	<update id="readCountup" parameterType="int">
+		update project
+		set readcnt = readcnt+1
+		where project_no = #{project_no}	
+	</update>
+	
+	<select id="getBoardDetail" parameterType="int" resultType="pmboard">
+			
+		SELECT b.*, f.fname 
+		FROM project b, pmboardfile f
+		WHERE b.project_no = f.project_no(+)
+		and b.project_no = #{project_no}
+		
+	</select>
+	
+	<!--
+	and b.project_no = #{project_no}
+	
+	 
+	select *
+		from project
+		where project_no = #{project_no}
+	 -->
+	
+	
+	
+	
+		
+	<insert id="insertFile" parameterType="pmboardfile">
+		insert into pmboardfile values(project_seq.currval,#{path}, #{fname},'')
+	</insert>
+	
+	<!-- 
+	<insert id="insertFile" parameterType="boardfile">
+		insert into  boardfile values(board_seq.currval,
+		#{path}, #{fname}, sysdate, sysdate, '')
+	</insert>
+	 -->
+	
+	 
+	<insert id="insertPM" parameterType="pmboard">
+		INSERT INTO project values(project_seq.nextval,#{pcategory},#{pname},#{content},#{progress},#{readcnt},#{auth},#{name})
+	</insert>
+	
+	
+	<!-- 
+	UPDATE project
+		   SET pname = #{pname},
+		   	   pcategory = #{pcategory},
+		   	   progress = #{progress},
+			   content = #{content}
+		WHERE project_no = #{project_no}
+	 -->
+	 
+	<update id="updateBoard" parameterType="pmboard">
+		UPDATE project
+		   SET pname = #{pname},
+		   	   pcategory = #{pcategory},
+		   	   progress = #{progress},
+			   content = #{content},
+			   auth = #{auth},
+			   name = #{name}
+		WHERE project_no = #{project_no}	
+	</update>
+	
+	<delete id="deleteBoard" parameterType="int">
+		delete
+		from project
+		where project_no = #{project_no}	
+	</delete>
+	<!-- 
+	
+	<select id="startCount" parameterType="pmboardsch" resultType="int">
+	SELECT count(*)
+	FROM project
+	WHERE pcategory LIKE '%'||'시작'||'%'
+	</select>
+	
+	
+
+	 -->
+
+	
+	
+	</mapper>
+
+<!-- 
+<if test="pname!=null">
+     and pname like '%'||#{pame}||'%'
+     </if>
+
+ -->

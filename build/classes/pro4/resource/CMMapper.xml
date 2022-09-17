@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+               "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="pro4.dao.CMDao">
+
+	<resultMap type="minutes" id="minutes">
+		<result column="minutes_no" property="minutes_no"/>
+		<result column="subject" property="subject"/>
+		<result column="contents" property="contents"/>
+		<result column="decision" property="decision"/>
+		<result column="mdate" property="mdate"/>
+		<result column="wdate" property="wdate"/>
+		<result column="attendees" property="attendees"/>
+		<result column="project_no" property="project_no"/>
+		<result column="empno" property="empno"/>
+		<result column="name" property="name"/>
+		<collection property="project" resultMap="project"/>
+		<collection property="prjList" resultMap="prjList"/>
+	</resultMap>
+	
+	<resultMap type="project" id="project">
+		<result column="project_no" property="project_no"/>
+		<result column="pcategory" property="pcategory"/>
+		<result column="progress" property="progress"/>
+		<result column="pname" property="pname"/>
+		<result column="content" property="content"/>
+		<result column="filename" property="filename"/>
+		<collection property="prjList" resultMap="prjList"/>
+	</resultMap>
+
+	<resultMap type="prjList" id="prjList">
+		<result column="project_no" property="project_no"/>
+		<result column="sdate" property="sdate"/>
+		<result column="edate" property="edate"/>
+	</resultMap>
+	
+	<select id="getPrjList" resultMap="project">
+		SELECT p.project_no, pname, progress, content, sdate, edate
+		FROM project p, project_sch ps
+		WHERE p.project_no = ps.project_no
+		ORDER BY sdate DESC
+	</select>	
+	
+	<select id="getPrjInfo" resultMap="project" parameterType="int">
+		SELECT p.project_no, pname, progress, content, sdate, edate
+		FROM project p, project_sch ps
+		WHERE p.project_no = ps.project_no 
+		AND p.project_no = #{project_no}
+	</select>
+
+	<select id="getMinutesList" resultType="minutes" parameterType="int">
+		SELECT minutes_no, subject, contents, decision, mdate, wdate, attendees, p.project_no, m4.empno, m4.name
+		FROM minutes m, project p, Mem4pro m4
+		WHERE m.project_no = p.project_no
+		AND m.empno = m4.empno
+		AND m.project_no = #{project_no}
+		ORDER BY minutes_no DESC
+	</select>
+
+	<select id="getMinutes" resultMap="minutes" parameterType="int">
+		SELECT minutes_no, subject, contents, decision, mdate, wdate, attendees, 
+			   p.project_no, m4.empno, p.pname, m4.name, sdate, edate
+		FROM minutes m, project p, project_sch ps, Mem4pro m4
+		WHERE m.project_no = p.project_no
+		AND m.project_no = ps.project_no
+		AND m.empno = m4.empno
+		AND minutes_no = #{minutes_no}
+	</select>
+
+	<insert id="regMinutes" parameterType="minutes">
+		INSERT INTO minutes
+		VALUES (seq_minutes.nextval, 
+				#{subject}, #{contents}, #{decision},			   
+				TO_DATE(#{mdateS}, 'YYYY-MM-DD"T"HH24:MI:SS'), 
+				TO_DATE(#{wdateS}, 'YYYY-MM-DD"T"HH24:MI:SS'), 
+				#{attendees}, #{project_no}, #{empno})
+	</insert>
+	
+	<update id="uptMinutes" parameterType="minutes">
+		UPDATE minutes
+		SET    subject = #{subject},
+			   contents = #{contents},
+			   decision = #{decision},
+			   mdate = TO_DATE(#{mdateS}, 'YYYY-MM-DD"T"HH24:MI:SS'),
+			   wdate = TO_DATE(#{wdateS}, 'YYYY-MM-DD"T"HH24:MI:SS'),
+			   attendees = #{attendees}
+		WHERE  minutes_no = #{minutes_no}
+	</update>
+	
+	<delete id="delMinutes" parameterType="int">
+		DELETE FROM minutes 
+		WHERE minutes_no = #{minutes_no}
+	</delete>
+	
+	<select id="getMemName" resultType="String" parameterType="int">
+		SELECT name
+		FROM   Mem4pro
+		WHERE  empno = #{empno}
+	</select>
+	
+	<select id="searchMember" resultType="Member" parameterType="hashMap">
+		SELECT name, empno
+		FROM Mem4pro
+		WHERE 1=1
+		<if test="name != null">
+		AND name like '%'||#{name}||'%' 
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+               "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+               
+<mapper namespace="pro4.dao.MemberDao">
+	   
+
+		<select id="getLoginList" resultType="member" parameterType="member">
+			select * from Mem4pro
+		</select>
+		<select id="ck" resultType="member" parameterType="member">
+			select * from Mem4pro
+			WHERE empno =#{empno}
+			and pass =#{pass} 
+
+		</select>
+		<insert id="insert4pro" parameterType="member">
+			insert into Mem4pro(empno, name, email,pass, auth) values(#{empno},#{name},#{email}, #{pass},'user')
+		</insert>
+		<!-- public int getEmpno(); -->
+		<select id="getEmpno" resultType="int">
+			SELECT TO_NUMBER( TO_CHAR(SYSDATE, 'YYYYMM'))||empno_seq.nextval  FROM dual
+		</select>
+		
+		<!-- 메일발송시 임시비번 -->
+		<update id="uptTemPass" parameterType="member">
+			update Mem4pro
+			set pass = #{pass}
+			where empno = #{empno}
+		</update>
+		
+		<select id="getMember" resultType="member" parameterType="int">
+			select * 
+			from Mem4pro 
+			WHERE empno =#{empno}
+		</select>
+		<!-- 
+		<select id="getEmpno" resultType="member" parameterType="int">
+			SELECT empno_seq.nextval FROM dual
+		</select>
+		 -->
+		 <!-- 사원등록페이지 admin 만 가능 -->
+		 <select id="ckpm2" parameterType="int" resultType="string">
+		select auth from mem4pro where empno = #{empno}
+		</select>
+		
+		
+		
+		
+               
+</mapper>
+
+	          
+	
+	
+           
+               

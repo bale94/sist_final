@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+<mapper namespace="pro4.dao.RMDao01" >
+	<!--  <select id="RMList" resultType="rmlist">
+		SELECT RM_no, pname, tname, name, issue, 
+			importance, progress
+		FROM RM 
+		ORDER BY RM_no DESC
+		
+	</select>-->
+	
+	<select id="RMList" resultType="rmlist" parameterType="rmsch">
+		select *
+		from (
+		 select rownum cnt,  r.*  
+		 from RM r 
+		 WHERE 1=1
+		 <if test="pname!=null">
+		 AND pname LIKE '%'||#{pname}||'%'
+		 </if>
+		 ORDER BY RM_no ASC
+		  )
+	    where cnt between #{start} and #{end} 
+	</select>
+	
+	<insert id="RMInsert" parameterType="rmlist">
+		INSERT INTO RM(RM_no, pname, tname, name, writeDate,
+			 edate, importance, issue,progress,solution) 
+		values(RM_seq.nextval,#{pname},#{tname},#{name},
+			 to_date(#{writeDates},'YYYY-MM-DD'), 
+			 to_date(#{edates},'YYYY-MM-DD'),#{importance},
+			 #{issue},#{progress},#{solution})
+	</insert>
+
+	<update id="RMUpdateForm" parameterType="rmlist">
+		UPDATE RM
+		   SET pname = #{pname},
+		   	   tname = #{tname},
+		   	   writeDate = to_date(#{writeDates},'YYYY-MM-DD'),
+		   	   edate = to_date(#{edates},'YYYY-MM-DD'),
+		   	   importance = #{importance},
+		   	   progress = #{progress},
+			   issue = #{issue},
+			   solution = #{solution}
+		WHERE RM_no = #{RM_no}	
+	</update>
+
+	<select id="totCnt" parameterType="rmsch"  resultType="int">	 
+		 SELECT count(*)
+		 FROM RM
+		 WHERE 1=1	
+		 <if test="pname!=null">
+		 AND pname LIKE '%'||#{pname}||'%'
+		 </if>
+	</select>
+	 
+	
+
+	<select id="getRM" parameterType="int" resultType="rmlist">
+		select * from RM 
+		where RM_no = #{RM_no}
+	</select>
+
+	<update id="readCountup" parameterType="int">
+		update RM
+		set readcnt = readcnt+1
+		where RM_no = #{RM_no}	
+	</update>	 
+ 	<delete id="RMDelete" parameterType="int">
+		delete
+		from RM
+		where RM_no = #{RM_no}	
+	</delete>	
+	 
+	<select id="getMember" resultType="String" parameterType="int">
+		SELECT name
+		FROM   Mem4pro
+		WHERE  empno = #{empno}
+	</select> 
+	
+	<!-- 
+	<select id="ckpm" parameterType="int" resultType="string">
+		select auth from mem4pro where empno = #{empno}
+	</select>
+	<select id="getAuth" parameterType="membersch" resultType="String">
+		select *
+		from Mem4pro
+		where empno = #{empno}
+	</select> 
+	 -->
+</mapper> 

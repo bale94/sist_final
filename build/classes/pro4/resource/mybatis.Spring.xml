@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases>
+		<typeAlias alias="project" type="pro4.vo.Project"/>
+		<typeAlias alias="todo" type="pro4.vo.Todo"/>
+		<typeAlias alias="member" type="pro4.vo.Member"/>
+		<typeAlias alias="membersch" type="pro4.vo.MemberSch"/>
+		<typeAlias alias="projectteam" type="pro4.vo.ProjectTeam"/>
+		<typeAlias alias="projectsch" type="pro4.vo.ProjectSch"/>
+		<typeAlias alias="todosch" type="pro4.vo.TodoSch"/>
+		<typeAlias alias="teammember" type="pro4.vo.TeamMember"/>
+		<typeAlias alias="minutes" type="pro4.vo.Minutes"/>
+		<typeAlias alias="pmboard" type="pro4.vo.PMBoard"/>
+		<typeAlias alias="pmboardsch" type="pro4.vo.PMBoardSch"/>
+		<typeAlias alias="pmboardfile" type="pro4.vo.PMBoardFile"/>
+		<typeAlias alias="prjList" type="pro4.vo.PrjList"/>
+		<typeAlias alias="rmlist" type="pro4.vo.RM01"/>
+		<typeAlias alias="rmsch" type="pro4.vo.RMSch"/>
+		<typeAlias alias="allschedule" type="pro4.vo.AllSchedule"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="pro4/resource/ScheduleMapper.xml" />
+		<mapper resource="pro4/resource/HresMapper.xml"/>
+		<mapper resource="pro4/resource/CMMapper.xml"/>
+		<mapper resource="pro4/resource/PMMapper.xml"/>
+		<mapper resource="pro4/resource/MemberMapper.xml"/>
+		<mapper resource="pro4/resource/RMMapper01.xml"/>
+	</mappers>
+
+</configuration>

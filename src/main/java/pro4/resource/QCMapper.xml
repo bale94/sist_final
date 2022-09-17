@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+               "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="pro4.dao.QCDao" >
+	<select id="QCList" resultType="qclist" parameterType="string">
+		SELECT q.project_no , p.pname , 
+		p.progress , s.sdate , 
+		s.edate , q.evaluation
+		FROM QC q, project p, project_sch s
+		WHERE q.project_no = p.project_no
+		AND q.project_no = s.project_no
+		<if test="pname!=null">
+			and pname like '%'||#{pname}||'%'
+		</if>
+	</select>
+</mapper>

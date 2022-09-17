@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="pro4.dao.ScheduleDao">
+<!-- 
+
+ -->
+	<resultMap type="todosch" id="psResult">
+		<result column="sdate" property="start"/>
+		<result column="edate" property="end"/>
+		<result column="pname" property="title"/>
+		<result column="project_no" property="id"/>
+	</resultMap> 
+	
+	<resultMap type="todosch" id="tsResult">
+		<result column="sdate" property="start"/>
+		<result column="edate" property="end"/>
+		<result column="tname" property="title"/>
+		<result column="todo_no" property="id"/>
+	</resultMap> 
+	<select id="getFname" parameterType="int" resultType="string">
+		select fname from file2 where todo_no=#{todo_no} AND file_no=(SELECT max(file_no) FROM file2 WHERE todo_no=#{todo_no}) 
+	</select>
+	<select id="ckEmpno" parameterType="int" resultType="int">
+		select empno from todo where todo_no = #{id}
+	</select>
+	<select id="checkTeam" parameterType="int" resultType="int">
+		select count(project_no) from team where empno=#{empno}
+	</select>
+	
+	<select id="ckpm" parameterType="int" resultType="string">
+		select auth from mem4pro where empno = #{empno}
+	</select>
+	<select id="getProjectSchList" parameterType="int" resultMap="psResult">
+	select p.project_no,sdate,edate,'[프로젝트] ' || pname pname,backgroundColor,textColor from project p, project_sch ps, team t 
+	where t.project_no=ps.project_no
+	and p.project_no=ps.project_no and empno = #{empno}
+	</select>
+	<select id="getProjectSchList2" resultMap="psResult">
+	select p.project_no,sdate,edate,'[프로젝트] ' || pname pname,backgroundColor,textColor from project p, project_sch ps 
+	where p.project_no=ps.project_no
+	</select>
+	<select id="getTodoSchList" parameterType="int" resultMap="tsResult">
+	select t.todo_no, t.project_no, sdate,edate,'[업무]' || '[' || name || '] ' || tname tname,backgroundColor,textColor,m.name 
+	from mem4pro m, todo_sch ts, todo t 
+	where ts.todo_no=t.todo_no and t.empno=m.empno and project_no in (select te.project_no from team te where empno = #{empno}) 
+	ORDER BY sdate asc
+	</select>
+	<select id="getTodoAS" parameterType="int" resultType="allschedule">
+	select m.*,ts.edate, ts.sdate, ts.TODO_NO tt,t.*,p.pname
+	from mem4pro m, todo_sch ts FULL OUTER join todo t ON ts.todo_no=t.todo_no, project p
+	where p.project_no=t.project_no and t.empno=m.empno and m.empno = #{empno}
+	ORDER BY ts.sdate desc
+	</select>
+	<select id="getTodoTAS" parameterType="int" resultType="allschedule">
+	select m.*,ts.edate, ts.sdate, ts.TODO_NO tt,t.*,p.pname
+	from mem4pro m, todo_sch ts FULL OUTER join todo t ON ts.todo_no=t.todo_no, project p
+	where p.project_no=t.project_no and t.empno=m.empno and p.project_no in (select pp.project_no from project pp, team ttt where pp.project_no=ttt.project_no and empno=#{empno} )
+	ORDER BY t.todo_no desc
+	</select>
+	<select id="getTodoSchList2" parameterType="int" resultMap="tsResult">
+	select t.todo_no, t.project_no, sdate,edate,'[업무] ' || '[' || name || '] ' || tname tname,backgroundColor,textColor,m.name 
+	from mem4pro m, todo_sch ts, todo t 
+	where ts.todo_no=t.todo_no and t.empno=m.empno and project_no in (select te.project_no from team te where empno = #{empno}) 
+	ORDER BY sdate asc
+	</select>
+	<select id="getTodoSchList3" parameterType="int" resultMap="tsResult">
+	select t.todo_no, t.project_no, sdate,edate,'[업무] ' || '[' || name || '] ' || tname tname,backgroundColor,textColor,m.name 
+	from mem4pro m, todo_sch ts, todo t 
+	where ts.todo_no=t.todo_no and t.empno=m.empno and t.empno = #{empno} 
+	ORDER BY sdate asc
+	</select>
+	<select id="getProject" parameterType="int" resultType="projectteam">
+		select * from project p, team t
+		where p.project_no = t.project_no and 
+		empno = #{empno} AND NOT p.project_no in 
+		(select psh.project_no from project_sch psh, team tm WHERE psh.PROJECT_NO =tm.PROJECT_NO AND empno = #{empno})
+	</select>
+
+	<select id="getTodo" parameterType="int" resultType="todo">
+		select t.todo_no, '[' || pname || '] ' || tname tname, p.project_no, empno from todo t, project p
+		where t.project_no=p.project_no and empno =  #{empno}
+		and NOT t.todo_no in 
+		(select todo_no from todo_sch where empno= #{empno})
+	</select>
+	<select id="getTodoAll" parameterType="int" resultType="todo">
+		select t.todo_no, '[' || m.name || '] ' || t.tname tname, p.project_no, m.empno from todo t, project p, mem4pro m
+		where m.empno=t.empno and t.project_no=p.project_no and p.project_no in (select te.project_no from team te where te.empno=#{empno})
+		and NOT t.todo_no in 
+		(select todo_no from todo_sch)
+	</select>
+	<select id="getMemlist" parameterType="int" resultType="member">
+		select name, m.empno from mem4pro m, team t where m.empno=t.empno and project_no=(select tt.project_no from team tt where tt.empno=#{empno}) and m.empno NOT IN (#{empno})
+	</select>
+	<select id="getProjectNo" parameterType="int" resultType="int">
+		select project_no from team where empno= #{empno}
+	</select>
+	<insert id="insertTodo" parameterType="allschedule">
+		insert into todo values(todo_seq.nextval,#{tname},'요청됨',#{project_no},#{empno})
+	</insert>
+	<insert id="insertFile" parameterType="allschedule">
+		insert into file2 values(fno_seq.nextval,#{fname},#{todo_no},#{empno})
+	</insert>
+
+
+	<insert id="insertProjectSch" parameterType="todosch">
+		insert into project_sch values(#{project_no}, #{start}, to_date(#{end},'YYYY-MM-DD HH24:MI:SS'), #{backgroundColor}, #{textColor})
+	</insert>
+	
+	<insert id="insertTodoSch" parameterType="todosch">
+		insert into todo_sch values(#{todo_no}, #{start}, to_date(#{end},'YYYY-MM-DD HH24:MI:SS'), #{backgroundColor}, #{textColor})
+	</insert>
+	<update id="updateTodoProgress" parameterType="allschedule">
+	 UPDATE todo
+	   set progress = #{progress}
+	   where todo_no = #{todo_no}
+	</update>
+	<update id="updateProjectSch" parameterType="todosch">
+	 UPDATE project_sch
+	    SET sdate = #{start},
+	        edate = to_date(#{end},'YYYY-MM-DD HH24:MI:SS'),
+	        backgroundcolor=#{backgroundColor},
+	        textcolor=#{textColor}
+	   WHERE project_no = #{id}
+	</update> 
+	<update id="updateTodoSch" parameterType="todosch">
+	 UPDATE todo_sch
+	    SET sdate = #{start},
+	        edate = to_date(#{end},'YYYY-MM-DD HH24:MI:SS'),
+	        backgroundcolor=#{backgroundColor},
+	        textcolor=#{textColor}
+	   WHERE todo_no = #{id}
+	</update> 
+	<update id="updateProjectSch2" parameterType="todosch">
+	 UPDATE project_sch
+	    SET sdate = #{start},
+	        edate = to_date(#{end},'YYYY-MM-DD HH24:MI:SS')
+	   WHERE project_no = #{id}
+	</update> 
+	<update id="updateTodoSch2" parameterType="todosch">
+	 UPDATE todo_sch
+	    SET sdate = #{start},
+	        edate = to_date(#{end},'YYYY-MM-DD HH24:MI:SS')
+	   WHERE todo_no = #{id}
+	</update> 
+	<delete id="deleteTodoSch" parameterType="int">
+		delete from todo_sch
+		where todo_no = #{id}
+	</delete>
+	<delete id="deleteProjectSch" parameterType="int">
+		delete from project_sch
+		where project_no = #{id}
+	</delete>
+</mapper>

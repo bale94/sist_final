@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+               "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+               
+<mapper namespace="pro4.dao.HresDao">
+	<select id="totCnt" parameterType="member" resultType="int">
+		select count(*)
+		from Mem4pro
+		where 1=1
+		<if test="name!=null">
+		AND name like '%'||#{name}||'%'
+		</if>
+	</select>
+	
+	<select id="prjCnt" parameterType="teammember" resultType="int">
+		select count(*)
+		from mem4pro m, team t
+		where 1=1
+		and m.empno = t.empno
+		<if test="name!=null">
+		and m.name like '%'||#{name}||'%'
+		</if>
+	</select>
+	
+	<select id="hresList" resultType="member" parameterType="memberSch">
+		select *
+		from (
+			select rownum cnt, m.*
+			from Mem4pro m
+			where 1=1
+			<if test="name!=null">
+			and name like '%'||#{name}||'%'
+			</if>
+			)
+		where cnt between #{start} and #{end}
+	</select>
+	<!-- public Member hresUptAuth(Member upt); -->
+	<update id="hresUptAuth" parameterType="member">
+		update Mem4pro
+			set auth = #{auth}
+		where empno = #{empno}
+	</update>
+	
+	<insert id="hresProjInsert" parameterType="teammember">
+		insert into Team values(#{empno}, #{project_no})
+	</insert>
+	
+	<select id="getHresDetail" resultType="member" parameterType="int">
+		select *
+		from Mem4pro m
+		where empno = #{empno}
+	</select>
+	
+	<select id="getProjMemDetail" resultType="teammember" parameterType="int">
+		select m.empno, m.name, m.email, m.auth, t.project_no
+		from Mem4pro m, team t
+		where m.empno = t.empno
+		and m.empno = #{empno}
+	</select>
+	
+	
+	<select id="hresPrjList" resultType="teammember" parameterType="memberSch">
+		select *
+		from(
+			select rownum cnt, m.empno, m.name, m.email, m.auth, t.project_no 
+			from Mem4pro m, team t
+			where 1=1
+			and m.empno = t.empno
+			<if test="name!=null">
+			and m.name like '%'||#{name}||'%'
+			</if>
+			order by m.empno asc
+			)
+		where cnt between #{start} and #{end}
+	</select>
+	
+	<update id="hresUptPrj" parameterType="teammember">
+		update team
+			<if test="project_no!=null">
+				set project_no = #{project_no}
+			</if>
+		<if test="empno!=null">
+			where empno = #{empno}
+		</if>
+	</update>
+	
+	<select id="getMember" resultType="member" parameterType="int">
+		select * 
+		from Mem4pro 
+		where empno = #{empno}
+	</select>
+	
+	<update id="uptMember" parameterType="member">
+		update Mem4pro
+			set pass = #{pass}
+		where empno = #{empno}
+	</update>
+	
+	<delete id="delProjMem" parameterType="teammember">
+		delete
+		from team
+		where empno = #{empno}
+	</delete>
+	
+	<select id="getAuth" parameterType="membersch" resultType="String">
+		select *
+		from Mem4pro
+		where empno = #{empno}
+	</select>
+	
+	<select id="checkTeam" parameterType="int" resultType="int">
+		select count(project_no) from team where empno = #{empno}
+	</select>
+	
+	<select id="ckpm" parameterType="int" resultType="string">
+		select auth from mem4pro where empno = #{empno}
+	</select>
+	
+	<select id="empnock" resultType="int" parameterType="int">
+		select count(*)
+		from team
+		where empno = #{empno}
+	</select>
+	
+
+</mapper>
